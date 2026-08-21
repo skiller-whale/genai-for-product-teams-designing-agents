@@ -1,0 +1,28 @@
+services:
+  agent_workbench:
+    build: .
+    # Host 1001 -> container 3000. The module's exercise_config.yaml exposes
+    # port 1001, and learners open http://localhost:1001 in the hosted env.
+    ports:
+      - "1001:3000"
+    environment:
+      # In the hosted environment the LLM is reached via the Bedrock proxy,
+      # authenticated with the learner's attendance id (no real API key).
+      AI_PROVIDER: "${AI_PROVIDER:-bedrock}"
+      SW_ATTENDANCE_ID: "${SW_ATTENDANCE_ID:-}"
+      BEDROCK_MODEL_ID: "${BEDROCK_MODEL_ID:-eu.anthropic.claude-sonnet-4-5-20250929-v1:0}"
+      # Used only for local verification, where AI_PROVIDER=ollama points the
+      # tool at an Ollama server (e.g. the host's, reached via host.docker.internal).
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-qwen2.5:7b}"
+    volumes:
+      # Learner-edited agent config and eval run history survive container
+      # restarts within a session.
+      - workbench_data:/app/data
+    # Harmless in production; lets the verification emulator reach a host Ollama.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+volumes:
+  workbench_data:
