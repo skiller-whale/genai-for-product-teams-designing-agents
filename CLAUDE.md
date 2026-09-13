@@ -22,6 +22,9 @@ matter when editing.
   `src/server/scenario/webResults.ts` (the archived 2019 refund policy) is a
   deliberate trap; the `tools-web-trap` eval case is graded by assertions only,
   no judge.
+- **The knowledge base says nothing about medical advice.** The medical eval
+  case should fail until the learner adds a rule; a KB policy line makes it pass
+  without one.
 - **Modes gate the UI, and the eval cases come in per-mode blocks.** The mode
   order and what each unlocks live in `MODES` (`src/shared/types.ts`); the
   blocks live in `src/server/evals/cases.ts`. Investigation mode runs a fixed
@@ -48,7 +51,8 @@ client in `src/client` (Vite). Shared types in `src/shared/types.ts`.
 - Container port 3000, host port 1001; single server serves frontend + API.
 - Bedrock proxy: endpoint `https://bedrock-runtime.aws-proxy.skillerwhale.com/`,
   region `eu-west-1`, access key = `SW_ATTENDANCE_ID`, secret literally `'unused'`.
-- `maxTokens` defaults: 1024 for agent calls, 256 for judge calls. A full eval
+- Hosted model: Claude Sonnet 5. No `temperature` is sent, and thinking is disabled.
+- `maxTokens` defaults: 1536 for agent calls, 384 for judge calls. A full eval
   run is ~50–70 LLM calls; keep concurrency at 3 (see `evals/runner.ts`) —
   a classroom of learners shares the proxy.
 

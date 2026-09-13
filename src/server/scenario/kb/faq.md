@@ -15,7 +15,6 @@ Flat, grippy shoes — the deck is wetter than you think.
 
 Practical things that help: sail on a fuller stomach than you'd expect, stay on deck, watch the horizon, and stand midship where the boat moves least.
 The Harbour Hop, in sheltered water, is the calmest choice.
-For medication, please talk to a pharmacist or your GP — the crew can't advise on medicines.
 
 ## Can I buy a tour as a present?
 

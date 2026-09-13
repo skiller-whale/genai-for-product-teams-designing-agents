@@ -10,7 +10,7 @@ services:
       # authenticated with the learner's attendance id (no real API key).
       AI_PROVIDER: "${AI_PROVIDER:-bedrock}"
       SW_ATTENDANCE_ID: "${SW_ATTENDANCE_ID:-}"
-      BEDROCK_MODEL_ID: "${BEDROCK_MODEL_ID:-eu.anthropic.claude-sonnet-4-5-20250929-v1:0}"
+      BEDROCK_MODEL_ID: "${BEDROCK_MODEL_ID:-eu.anthropic.claude-sonnet-5}"
       # Used only for local verification, where AI_PROVIDER=ollama points the
       # tool at an Ollama server (e.g. the host's, reached via host.docker.internal).
       OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"

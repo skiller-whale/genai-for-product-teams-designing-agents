@@ -8,7 +8,7 @@ import type {
 } from '../ai';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const MODEL = process.env.CLAUDE_MODEL ?? 'claude-sonnet-4-6';
+const MODEL = process.env.CLAUDE_MODEL ?? 'claude-sonnet-5';
 
 function toClaudeMessage(message: ChatMessage): Anthropic.MessageParam {
   const content: Anthropic.ContentBlockParam[] = message.content.map((block) => {
@@ -50,8 +50,8 @@ export class ClaudeProvider implements AIProvider {
   async converse(request: ConverseRequest): Promise<ConverseResult> {
     const msg = await client.messages.create({
       model: MODEL,
-      max_tokens: request.maxTokens ?? 1024,
-      temperature: request.temperature ?? 0.1,
+      max_tokens: request.maxTokens ?? 1536,
+      thinking: { type: 'disabled' },
       system: request.system,
       messages: request.messages.map(toClaudeMessage),
       ...(request.tools?.length

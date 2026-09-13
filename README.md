@@ -53,7 +53,7 @@ bunx playwright test    # e2e tests (mock every /api route)
 ## Calibration note
 
 The eval blocks are written for the hosted model (`BEDROCK_MODEL_ID`,
-currently Claude Sonnet 4.5): the Investigation preset should pass most of its
+currently Claude Sonnet 5): the Investigation preset should pass most of its
 block, the blank slate should fail most of the tools block until tools are
 enabled, tone scores should clear `TONE_PASS_THRESHOLD` with a decent prompt,
 and `COST_BLOCK_BUDGET_USD` should be beatable by a lean agent. A different

@@ -28,6 +28,7 @@ export interface ConverseRequest {
   messages: ChatMessage[];
   tools?: ToolSpec[];
   maxTokens?: number;
+  /** Ollama only. */
   temperature?: number;
 }
 

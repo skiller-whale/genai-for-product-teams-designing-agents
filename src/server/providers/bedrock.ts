@@ -19,7 +19,7 @@ import type {
 // is no real API key in the VM.
 const ENDPOINT = process.env.BEDROCK_ENDPOINT ?? 'https://bedrock-runtime.aws-proxy.skillerwhale.com/';
 const REGION = process.env.BEDROCK_REGION ?? 'eu-west-1';
-const MODEL_ID = process.env.BEDROCK_MODEL_ID ?? 'eu.anthropic.claude-sonnet-4-5-20250929-v1:0';
+const MODEL_ID = process.env.BEDROCK_MODEL_ID ?? 'eu.anthropic.claude-sonnet-5';
 
 const client = new BedrockRuntimeClient({
   region: REGION,
@@ -90,10 +90,9 @@ export class BedrockProvider implements AIProvider {
         system: [{ text: request.system }],
         messages: request.messages.map(toBedrockMessage),
         ...(tools ? { toolConfig: { tools } } : {}),
-        inferenceConfig: {
-          maxTokens: request.maxTokens ?? 1024,
-          temperature: request.temperature ?? 0.1,
-        },
+        // Sonnet 5 rejects temperature/top_p. Thinking is off: the agent loop doesn't keep thinking blocks.
+        inferenceConfig: { maxTokens: request.maxTokens ?? 1536 },
+        additionalModelRequestFields: { thinking: { type: 'disabled' } },
       }),
     );
 

@@ -31,7 +31,7 @@ export interface ToneScoreOutcome {
 }
 
 /** Ask the model to grade an answer against a rubric. Deliberately boring:
- * temperature 0, tiny output, JSON only. Judges can still be wrong — that is
+ * temperature 0 where the provider allows it, tiny output, JSON only. Judges can still be wrong — that is
  * one of the things the session teaches. */
 export async function judgeAnswer(
   provider: AIProvider,
@@ -50,7 +50,7 @@ export async function judgeAnswer(
     const response = await provider.converse({
       system: JUDGE_SYSTEM,
       messages: [{ role: 'user', content: [{ type: 'text', text: user }] }],
-      maxTokens: 256,
+      maxTokens: 384,
       temperature: 0,
     });
     const text = response.content
@@ -86,7 +86,7 @@ export async function scoreTone(
     const response = await provider.converse({
       system: TONE_JUDGE_SYSTEM,
       messages: [{ role: 'user', content: [{ type: 'text', text: user }] }],
-      maxTokens: 256,
+      maxTokens: 384,
       temperature: 0,
     });
     const text = response.content

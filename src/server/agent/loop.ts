@@ -48,7 +48,7 @@ export async function runAgent(options: AgentRunOptions): Promise<AgentRunResult
       system,
       messages,
       tools,
-      maxTokens: options.maxTokens ?? 1024,
+      maxTokens: options.maxTokens ?? 1536,
     });
     llmCalls += 1;
     usage = addUsage(usage, response.usage);

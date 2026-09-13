@@ -23,4 +23,3 @@ The Harbour Hop, in sheltered water, is fine at any stage — but please talk to
 - Lifejackets are provided and must be worn on deck at all times on all tours; child sizes are available.
 - All vessels carry a qualified first-aider and are in radio contact with Port Brine harbour control throughout.
 - Follow crew instructions at all times; the skipper's word is final.
-- We do not give medical advice. For questions about seasickness medication, pregnancy, or existing conditions, please talk to a pharmacist or your GP before sailing.

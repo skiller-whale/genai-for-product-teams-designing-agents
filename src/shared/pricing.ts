@@ -1,11 +1,11 @@
 import type { CostBudgetLevel, TokenUsage } from './types';
 
-// Approximate on-demand pricing for the hosted model (Claude Sonnet 4.5),
+// Approximate on-demand pricing for the hosted model (Claude Sonnet 5),
 // in USD per million tokens. Used only to give learners a feel for relative
 // cost — not a billing system. If the hosted model changes, update these.
 export const PRICE_PER_MILLION_TOKENS = {
-  input: 3.0,
-  output: 15.0,
+  input: 2.0,
+  output: 10.0,
 };
 
 export function costUsd(usage: TokenUsage): number {
