@@ -22,7 +22,7 @@ export function ToolsPanel({ config, tools, onChange }: Props) {
         Tools <span className="panel-count">{enabledCount}</span>
       </h2>
       <p className="panel-hint">
-        Things the agent can <strong>do</strong>, not just say. Each tool changes what the agent can reach — for better or worse.
+        Things the agent can <strong>do</strong>, not just say. Each tool changes what it can reach.
       </p>
       <ul className="tools-list">
         {tools.map((tool) => {

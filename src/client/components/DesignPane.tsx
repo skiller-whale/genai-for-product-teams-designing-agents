@@ -1,6 +1,5 @@
 import type { AgentConfig, Mode, ToneBrief, ToolInfo } from '../../shared/types';
 import { modeInfo } from '../../shared/types';
-import { RulesPanel } from './RulesPanel';
 import { SkillsPanel } from './SkillsPanel';
 import { ToolsPanel } from './ToolsPanel';
 
@@ -27,8 +26,7 @@ export function DesignPane({ mode, config, tools, toneBriefs, onChange, onReset 
         <h2>Agent design</h2>
         {investigation && (
           <p className="design-readonly-note" data-testid="design-readonly-note">
-            This agent came pre-built for the investigation — you can read its design, but not
-            change it. From the next exercise you'll build your own, from scratch.
+            This agent is pre-built and read-only. You'll build your own from the next exercise.
           </p>
         )}
       </div>
@@ -37,14 +35,12 @@ export function DesignPane({ mode, config, tools, toneBriefs, onChange, onReset 
         (investigation ? (
           <ReadOnlySystemPrompt config={config} />
         ) : (
-          <SystemPromptPanel config={config} toneBriefs={toneBriefs} onChange={onChange} />
-        ))}
-
-      {(investigation || editable.includes('rules')) &&
-        (investigation ? (
-          <ReadOnlyRules config={config} />
-        ) : (
-          <RulesPanel config={config} onChange={onChange} />
+          <SystemPromptPanel
+            config={config}
+            toneBriefs={toneBriefs}
+            onChange={onChange}
+            title={mode === 'rules' ? 'System prompt (and rules)' : 'System prompt'}
+          />
         ))}
 
       {(investigation || editable.includes('skills')) &&
@@ -76,17 +72,19 @@ function SystemPromptPanel({
   config,
   toneBriefs,
   onChange,
+  title,
 }: {
   config: AgentConfig;
   toneBriefs: ToneBrief[];
   onChange: (config: AgentConfig) => void;
+  title: string;
 }) {
   return (
     <section className="panel" data-testid="system-prompt-panel">
-      <h2>System prompt</h2>
+      <h2>{title}</h2>
       <p className="panel-hint">
-        The agent's standing orders, read before <strong>every</strong> message. Who it is, how it
-        behaves — and how it sounds.
+        The agent's standing orders, read before <strong>every</strong> message: who it is, how it
+        behaves, how it sounds, and any rules, written as plain instructions.
       </p>
       <textarea
         className="system-prompt-editor"
@@ -95,14 +93,15 @@ function SystemPromptPanel({
         onChange={(e) => onChange({ ...config, systemPrompt: e.target.value })}
         aria-label="System prompt"
       />
-      <p className="system-prompt-fixed" title="Added by the Workbench so results are repeatable. Not editable.">
+      <p className="system-prompt-fixed" title="Fixed by the Workbench; not editable.">
         📌 Always added for you: <em>Today's date is Tuesday 14 July 2026.</em>
       </p>
 
       <div className="tone-picker" data-testid="tone-picker">
         <h3>Tone brief</h3>
         <p className="panel-hint">
-          The tone evals score Finn's replies against the brief you pick here.
+          The tone evals score Finn's replies against the brief you pick here. Pick either: the
+          Concierge is the easier one, and the Deckhand has more to get right.
         </p>
         {toneBriefs.map((brief) => (
           <label
@@ -116,7 +115,9 @@ function SystemPromptPanel({
               onChange={() => onChange({ ...config, toneBrief: brief.id })}
             />
             <span className="tone-option-text">
-              <span className="tone-option-name">{brief.name}</span>
+              <span className="tone-option-name">
+                {brief.name} <span className="tone-option-difficulty">({brief.difficulty})</span>
+              </span>
               <span className="tone-option-brief">{brief.brief}</span>
             </span>
           </label>
@@ -131,30 +132,13 @@ function ReadOnlySystemPrompt({ config }: { config: AgentConfig }) {
     <section className="panel readonly" data-testid="system-prompt-panel">
       <h2>System prompt</h2>
       <p className="panel-hint">
-        The agent's standing orders, read before <strong>every</strong> message.
+        The agent's standing orders, read before <strong>every</strong> message — including its
+        rules.
       </p>
       <pre className="readonly-block">{config.systemPrompt}</pre>
       <p className="system-prompt-fixed">
         📌 Always added: <em>Today's date is Tuesday 14 July 2026.</em>
       </p>
-    </section>
-  );
-}
-
-function ReadOnlyRules({ config }: { config: AgentConfig }) {
-  return (
-    <section className="panel readonly" data-testid="rules-panel">
-      <h2>
-        Rules <span className="panel-count">{config.rules.length}</span>
-      </h2>
-      <p className="panel-hint">
-        Plain-English instructions the agent reads on <strong>every</strong> message.
-      </p>
-      <ul className="readonly-rules">
-        {config.rules.map((rule, index) => (
-          <li key={index}>{rule}</li>
-        ))}
-      </ul>
     </section>
   );
 }

@@ -21,9 +21,9 @@ export const MODES: ModeInfo[] = [
   { id: 'investigation', label: 'Investigation', editable: [] },
   { id: 'tools', label: 'Tools', editable: ['tools'] },
   { id: 'prompt', label: 'System prompt', editable: ['tools', 'systemPrompt'] },
-  { id: 'rules', label: 'Rules', editable: ['tools', 'systemPrompt', 'rules'] },
-  { id: 'skills', label: 'Skills', editable: ['tools', 'systemPrompt', 'rules', 'skills'] },
-  { id: 'cost', label: 'Cost', editable: ['tools', 'systemPrompt', 'rules', 'skills'] },
+  { id: 'rules', label: 'Rules', editable: ['tools', 'systemPrompt'] },
+  { id: 'skills', label: 'Skills', editable: ['tools', 'systemPrompt', 'skills'] },
+  { id: 'cost', label: 'Cost', editable: ['tools', 'systemPrompt', 'skills'] },
 ];
 
 export function modeInfo(mode: Mode): ModeInfo {
@@ -41,6 +41,8 @@ export interface ToneBrief {
   name: string;
   /** The learner-facing brief: what the voice should sound like. */
   brief: string;
+  /** Relative difficulty, shown to the learner so the choice is informed. */
+  difficulty: 'easier' | 'harder';
 }
 
 /** A learner-authored skill: a named, plain-English procedure the agent can
@@ -60,7 +62,10 @@ export interface AgentConfig {
   systemPrompt: string;
   /** Which tone brief the judge scores the prompt block against. */
   toneBrief: string | null;
-  /** Plain-English rules appended to the system prompt on every request. */
+  /** No longer editable — rules are taught as standing instructions written
+   * into `systemPrompt` itself. Kept only so an old stored config.json with a
+   * `rules` array doesn't crash on load; always empty in practice, and
+   * `buildSystemPrompt` is a no-op for an empty list. */
   rules: string[];
   skills: Skill[];
   /** Ids of the tools the agent is allowed to use (load_skill is always on). */

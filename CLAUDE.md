@@ -18,6 +18,14 @@ matter when editing.
   prompt on every request; skills contribute only name + description until the
   agent calls `load_skill`. The session's token-cost teaching depends on this
   difference being real, so never inline skill bodies into the prompt.
+- **Rules are taught as system-prompt instructions, not a separate
+  mechanism.** There is no rules panel, rules-editing UI, or rules-only API —
+  Rules mode edits the same system prompt as Prompt mode
+  (`MODES` in `src/shared/types.ts`), and `investigationPreset()` folds its
+  former rules straight into its system prompt text. `AgentConfig.rules` is
+  kept only so an old `config.json` with a `rules` array doesn't crash on
+  load; `sanitiseConfig` always ignores it, so it is empty in practice and
+  `buildSystemPrompt`'s rules section never renders.
 - **The web-trap must stay deterministic.** The first canned result in
   `src/server/scenario/webResults.ts` (the archived 2019 refund policy) is a
   deliberate trap; the `tools-web-trap` eval case is graded by assertions only,

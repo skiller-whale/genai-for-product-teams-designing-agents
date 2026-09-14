@@ -147,8 +147,7 @@ export function ChatPane() {
     >
       <div className="chat-toolbar">
         <span className="chat-toolbar-hint">
-          You are talking to Finn as a customer would. Each conversation is separate — clear it to
-          start again.
+          You're talking to Finn as a customer would.
         </span>
         <button
           className="btn-clear-chat"
@@ -162,7 +161,7 @@ export function ChatPane() {
       <div className="chat-scroll" ref={scrollRef}>
         {turns.length === 0 && (
           <div className="chat-empty">
-            <p>Send Finn a customer message and watch how it handles it — every tool call is shown as a step.</p>
+            <p>Send Finn a customer message to see how it responds.</p>
             <div className="chat-suggestions">
               {SUGGESTIONS.map((s) => (
                 <button key={s} onClick={() => send(s)} disabled={busy}>

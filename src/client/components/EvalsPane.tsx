@@ -17,10 +17,10 @@ interface Props {
 }
 
 const BLOCK_INTRO: Record<Mode, string> = {
-  investigation: 'The eval set for the pre-built agent. Read each case and its checks before you run anything.',
-  tools: 'Every case here needs an ability the bare model does not have. Choose tools — and only the tools the job needs.',
-  prompt: 'The judge scores each reply against your chosen tone brief. Chase the percentage.',
-  rules: 'Behaviour problems, from easy to hard. Fix them with rules — and watch for the ones that resist.',
+  investigation: 'Read each case and its checks before running the evals.',
+  tools: 'Every case needs an ability the bare model lacks. Choose only the tools each one needs.',
+  prompt: 'The judge scores each reply against your chosen tone brief.',
+  rules: 'Behaviour problems, from easy to hard. Fix them with instructions in the system prompt.',
   skills: 'The ambitious set: multi-step policy questions that want a written procedure.',
   cost: 'Wide-ranging questions that invite long answers. Keep every case passing — under budget.',
 };
@@ -195,7 +195,7 @@ export function EvalsPane({ active, mode }: Props) {
                     Next level down: <strong>{stretchLevel.name}</strong> ({formatCost(stretchLevel.usd)}).
                   </>
                 ) : (
-                  <>That is the tightest level there is.</>
+                  <>This is the tightest level.</>
                 )}
               </>
             ) : (

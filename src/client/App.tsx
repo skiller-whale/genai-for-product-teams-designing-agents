@@ -45,7 +45,7 @@ export default function App() {
   );
 
   const handleReset = useCallback(() => {
-    if (!window.confirm('Reset your agent to a blank slate? Your system prompt, rules, skills and tool choices will be lost. (Your eval run history is kept.)')) {
+    if (!window.confirm('Reset your agent to a blank slate? Your system prompt, skills and tool choices will be lost. Eval history is kept.')) {
       return;
     }
     api.resetConfig().then(applyConfigResponse).catch((err) => setError(err.message));
@@ -86,7 +86,7 @@ export default function App() {
           ))}
         </nav>
         <div className="app-header-right">
-          <span className="sim-date" title="The agent believes this is today's date. It never changes, so results are repeatable.">
+          <span className="sim-date" title="The agent's date is fixed, so results repeat.">
             📅 {simulatedDate}
           </span>
         </div>

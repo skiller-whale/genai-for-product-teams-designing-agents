@@ -34,12 +34,11 @@ export function investigationPreset(): AgentConfig {
     systemPrompt: [
       BASE_PERSONA,
       'Be friendly, clear, and honest. Answer the question the customer actually asked.',
-    ].join('\n'),
-    toneBrief: null,
-    rules: [
       'Only state policies you have found in the knowledge base.',
       "If you can't find a booking or a policy, say so — never guess or invent details.",
-    ],
+    ].join('\n'),
+    toneBrief: null,
+    rules: [],
     skills: [
       {
         name: 'refund_calculations',
@@ -84,9 +83,10 @@ export function sanitiseConfig(raw: unknown): AgentConfig {
       ? input.systemPrompt
       : base.systemPrompt;
   const toneBrief = typeof input.toneBrief === 'string' && input.toneBrief !== '' ? input.toneBrief : null;
-  const rules = Array.isArray(input.rules)
-    ? input.rules.filter((r): r is string => typeof r === 'string' && r.trim() !== '').map((r) => r.trim())
-    : base.rules;
+  // Rules are no longer a learner-editable area — they're written into the
+  // system prompt instead. Tolerate a `rules` array left over from an old
+  // config.json, but never apply it.
+  const rules = base.rules;
   const skills = Array.isArray(input.skills)
     ? input.skills.map(sanitiseSkill).filter((s): s is Skill => s !== null)
     : base.skills;

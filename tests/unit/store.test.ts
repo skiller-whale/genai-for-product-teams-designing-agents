@@ -18,10 +18,12 @@ describe('baselineConfig', () => {
 });
 
 describe('investigationPreset', () => {
-  test('is a working agent: prompt, rules, a refund skill, grounded tools', () => {
+  test('is a working agent: its rules are folded into the system prompt, plus a refund skill and grounded tools', () => {
     const preset = investigationPreset();
     expect(preset.systemPrompt).toContain('Finn');
-    expect(preset.rules.length).toBeGreaterThan(0);
+    expect(preset.systemPrompt).toContain('Only state policies you have found in the knowledge base.');
+    expect(preset.systemPrompt).toContain("If you can't find a booking or a policy, say so");
+    expect(preset.rules).toEqual([]); // no separate rules list — it shows no Rules section
     expect(preset.skills.map((s) => s.name)).toEqual(['refund_calculations']);
     expect(preset.enabledTools).toEqual(['search_knowledge_base', 'lookup_booking', 'calculator']);
   });
@@ -32,15 +34,15 @@ describe('investigationPreset', () => {
 });
 
 describe('sanitiseConfig', () => {
-  test('passes a well-formed config through', () => {
+  test('passes a well-formed config through, ignoring any rules field', () => {
     const config = {
       systemPrompt: 'You are Finn.',
-      toneBrief: 'old-salt',
+      toneBrief: 'deckhand',
       rules: ['Be nice.'],
       skills: [{ name: 'refunds', description: 'd', body: 'b' }],
       enabledTools: ['search_knowledge_base', 'calculator'],
     };
-    expect(sanitiseConfig(config)).toEqual(config);
+    expect(sanitiseConfig(config)).toEqual({ ...config, rules: [] });
   });
 
   test('drops unknown tool ids and load_skill (which is not toggleable)', () => {
@@ -52,13 +54,13 @@ describe('sanitiseConfig', () => {
     expect(config.enabledTools).toEqual(['calculator']);
   });
 
-  test('drops malformed rules and skills', () => {
+  test('tolerates a rules field left over from an old config.json without applying it, and drops malformed skills', () => {
     const config = sanitiseConfig({
       rules: ['ok', '', 42, null],
       skills: [{ name: '', description: 'd', body: 'b' }, { name: 'good' }, 'nonsense'],
       enabledTools: [],
     });
-    expect(config.rules).toEqual(['ok']);
+    expect(config.rules).toEqual([]);
     expect(config.skills).toEqual([{ name: 'good', description: '', body: '' }]);
   });
 

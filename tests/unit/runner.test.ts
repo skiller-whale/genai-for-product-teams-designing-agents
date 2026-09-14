@@ -77,7 +77,7 @@ describe('runEvals', () => {
   });
 
   test('tone-scored cases record the score and pass at the threshold', async () => {
-    const config = { ...baselineConfig(), toneBrief: 'old-salt' };
+    const config = { ...baselineConfig(), toneBrief: 'deckhand' };
     const passing = await runEvals({
       provider: makeProvider(85),
       config,

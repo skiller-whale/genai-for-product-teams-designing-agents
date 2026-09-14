@@ -44,7 +44,7 @@ export function SkillsPanel({ config, onChange }: Props) {
         Skills <span className="panel-count">{config.skills.length}</span>
       </h2>
       <p className="panel-hint">
-        Named procedures the agent can <strong>load when needed</strong>. Only the name and description ride along on every message — the full text costs tokens only when loaded.
+        Named procedures the agent can <strong>load when needed</strong>. Only the name and description ride along on every message.
       </p>
 
       <ul className="skills-list">
@@ -52,7 +52,7 @@ export function SkillsPanel({ config, onChange }: Props) {
           <li key={skill.name} className="skill-item">
             <button className="skill-open" onClick={() => openEditor(index)}>
               <span className="skill-name">{skill.name}</span>
-              <span className="skill-description">{skill.description || 'No description — the agent may never load it!'}</span>
+              <span className="skill-description">{skill.description || 'No description — the agent may never load it.'}</span>
             </button>
           </li>
         ))}

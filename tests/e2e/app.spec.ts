@@ -11,14 +11,14 @@ const TOOLS = [
 ];
 
 const TONE_BRIEFS = [
-  { id: 'old-salt', name: 'The Old Salt', brief: 'Warm and unhurried.' },
-  { id: 'concierge', name: 'The Concierge', brief: 'Impeccably formal.' },
+  { id: 'concierge', name: 'The Concierge', brief: 'Formal and precise.', difficulty: 'easier' },
+  { id: 'deckhand', name: 'The Deckhand', brief: 'Bright, chatty and quick.', difficulty: 'harder' },
 ];
 
 const PRESET_CONFIG = {
-  systemPrompt: 'You are Finn. Be friendly.',
+  systemPrompt: 'You are Finn. Be friendly.\nOnly state policies you have found in the knowledge base.',
   toneBrief: null,
-  rules: ['Only state policies you have found in the knowledge base.'],
+  rules: [],
   skills: [{ name: 'refund_calculations', description: 'Refund sums.', body: 'Use the ladder.' }],
   enabledTools: ['search_knowledge_base', 'calculator'],
 };
@@ -180,12 +180,12 @@ test('investigation mode shows the preset agent read-only', async ({ page }) => 
   await expect(page.getByTestId('design-readonly-note')).toBeVisible();
   await expect(page.locator('.sim-date')).toContainText('Tuesday 14 July 2026');
 
-  // The preset is on display — prompt, rules, skill, tools — but not editable.
+  // The preset is on display — prompt (rules folded in), skill, tools — but not editable.
   await expect(page.getByTestId('system-prompt-panel')).toContainText('You are Finn. Be friendly.');
-  await expect(page.getByTestId('rules-panel')).toContainText('Only state policies');
+  await expect(page.getByTestId('system-prompt-panel')).toContainText('Only state policies');
+  await expect(page.getByTestId('rules-panel')).toHaveCount(0);
   await expect(page.getByTestId('skills-panel')).toContainText('refund_calculations');
   await expect(page.getByTestId('tools-panel')).toContainText('Calculator');
-  await expect(page.getByRole('button', { name: 'Add rule' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Reset my agent' })).toHaveCount(0);
 });
 
@@ -195,7 +195,6 @@ test('tools mode unlocks only the tools section', async ({ page }) => {
   await expect(page.getByTestId('tools-panel')).toBeVisible();
   await expect(page.getByTestId('tools-panel').getByRole('checkbox').first()).toBeEnabled();
   await expect(page.getByTestId('system-prompt-panel')).toHaveCount(0);
-  await expect(page.getByTestId('rules-panel')).toHaveCount(0);
   await expect(page.getByTestId('skills-panel')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Reset my agent' })).toBeVisible();
 });
@@ -204,32 +203,31 @@ test('prompt mode adds the system prompt editor and tone picker', async ({ page 
   await page.getByRole('button', { name: /System prompt/ }).click();
 
   await expect(page.getByLabel('System prompt')).toBeVisible();
-  await expect(page.getByTestId('tone-picker')).toContainText('The Old Salt');
+  await expect(page.getByTestId('tone-picker')).toContainText('The Deckhand');
   await expect(page.getByTestId('tools-panel')).toBeVisible();
-  await expect(page.getByTestId('rules-panel')).toHaveCount(0);
 
   // Picking a tone brief saves the config.
   const put = page.waitForRequest(
     (request) => request.url().includes('/api/config') && request.method() === 'PUT',
   );
-  await page.getByText('The Old Salt').click();
+  await page.getByText('The Deckhand').click();
   const request = await put;
-  expect(request.postDataJSON().toneBrief).toBe('old-salt');
+  expect(request.postDataJSON().toneBrief).toBe('deckhand');
 });
 
-test('rules mode allows adding a rule, which saves the config', async ({ page }) => {
+test('rules mode edits the same system prompt as prompt mode, with no separate rules panel', async ({ page }) => {
   await page.getByRole('button', { name: /Rules/ }).click();
+
+  await expect(page.getByLabel('System prompt')).toBeVisible();
+  await expect(page.getByTestId('tools-panel')).toBeVisible();
+  await expect(page.getByTestId('rules-panel')).toHaveCount(0);
 
   const put = page.waitForRequest(
     (request) => request.url().includes('/api/config') && request.method() === 'PUT',
   );
-  await page
-    .getByTestId('rules-panel')
-    .getByPlaceholder(/Only state policies/)
-    .fill('Never invent policies.');
-  await page.getByRole('button', { name: 'Add rule' }).click();
+  await page.getByLabel('System prompt').fill('You are Finn. Never invent policies.');
   const request = await put;
-  expect(request.postDataJSON().rules).toEqual(['Never invent policies.']);
+  expect(request.postDataJSON().systemPrompt).toBe('You are Finn. Never invent policies.');
 });
 
 test('chatting shows the tool step and the answer, and keeps the input focused', async ({ page }) => {
