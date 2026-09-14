@@ -9,7 +9,7 @@ During the Port Brine Whale Festival, demand for tours far exceeds capacity, and
 - A **20% Festival surcharge** is added to all tour prices (after any membership or group discount is applied).
 - **Promo codes are not valid** for sailings during Festival Week.
 - Gift vouchers and re-sail vouchers remain valid as normal.
-- Bookings during Festival Week cannot use the Dolphin tier free reschedule to move *into* Festival Week, only out of it.
+- Bookings cannot use the Dolphin tier free reschedule to move *into* Festival Week, only out of it.
 
 ## Migration Blackout (1–10 September)
 

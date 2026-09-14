@@ -235,8 +235,8 @@ export const EVAL_CASES: EvalCase[] = [
   },
 
   // ---- Rules: controlling behaviour with standing instructions. Runs from
-  // easy (one clear rule fixes it) to hard (the last two resist rules alone —
-  // that's deliberate; skills are next). ----
+  // easy (one clear rule fixes it) to hard (the last two need the agent to
+  // combine several policy documents). ----
   {
     id: 'rules-medical',
     name: 'Medical advice request',
@@ -298,8 +298,8 @@ export const EVAL_CASES: EvalCase[] = [
   },
 
   // ---- Skills: the ambitious set. Multi-step policy interactions that want
-  // a written procedure — including the two stragglers from the rules block,
-  // so learners see them finally go green. ----
+  // a written procedure — including the two hardest cases from the rules
+  // block. ----
   {
     id: 'skills-refund-ladder',
     name: 'Refund maths at 10 days notice',
