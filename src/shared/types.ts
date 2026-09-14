@@ -20,7 +20,7 @@ export interface ModeInfo {
 export const MODES: ModeInfo[] = [
   { id: 'investigation', label: 'Investigation', editable: [] },
   { id: 'tools', label: 'Tools', editable: ['tools'] },
-  { id: 'prompt', label: 'System prompt', editable: ['tools', 'systemPrompt'] },
+  { id: 'prompt', label: 'Tone of voice', editable: ['tools', 'systemPrompt'] },
   { id: 'rules', label: 'Rules', editable: ['tools', 'systemPrompt'] },
   { id: 'skills', label: 'Skills', editable: ['tools', 'systemPrompt', 'skills'] },
   { id: 'cost', label: 'Cost', editable: ['tools', 'systemPrompt', 'skills'] },

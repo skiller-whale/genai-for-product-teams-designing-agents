@@ -20,7 +20,7 @@ matter when editing.
   difference being real, so never inline skill bodies into the prompt.
 - **Rules are taught as system-prompt instructions, not a separate
   mechanism.** There is no rules panel, rules-editing UI, or rules-only API —
-  Rules mode edits the same system prompt as Prompt mode
+  Rules mode edits the same system prompt as Tone of voice mode
   (`MODES` in `src/shared/types.ts`), and `investigationPreset()` folds its
   former rules straight into its system prompt text. `AgentConfig.rules` is
   kept only so an old `config.json` with a `rules` array doesn't crash on

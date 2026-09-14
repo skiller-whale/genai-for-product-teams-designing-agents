@@ -200,7 +200,7 @@ test('tools mode unlocks only the tools section', async ({ page }) => {
 });
 
 test('prompt mode adds the system prompt editor and tone picker', async ({ page }) => {
-  await page.getByRole('button', { name: /System prompt/ }).click();
+  await page.getByRole('button', { name: /Tone of voice/ }).click();
 
   await expect(page.getByLabel('System prompt')).toBeVisible();
   await expect(page.getByTestId('tone-picker')).toContainText('The Deckhand');
@@ -210,7 +210,7 @@ test('prompt mode adds the system prompt editor and tone picker', async ({ page 
   const put = page.waitForRequest(
     (request) => request.url().includes('/api/config') && request.method() === 'PUT',
   );
-  await page.getByText('The Deckhand').click();
+  await page.getByRole('radio', { name: /The Deckhand/ }).click();
   const request = await put;
   expect(request.postDataJSON().toneBrief).toBe('deckhand');
 });
@@ -269,6 +269,10 @@ test('running a block fills the case list and the history table', async ({ page 
   const detail = page.locator('.case-detail');
   await expect(detail.getByText('never mentions "50%"')).toBeVisible();
   await expect(detail.getByText('Yes, full refund confirmed!')).toBeVisible();
+
+  // Switching mode closes it.
+  await page.getByRole('button', { name: /Tools/ }).click();
+  await expect(detail).toHaveCount(0);
 });
 
 test('a single case can be rerun on its own', async ({ page }) => {

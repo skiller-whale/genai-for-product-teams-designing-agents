@@ -3,7 +3,7 @@
 A sandbox for the Skiller Whale **Designing Agents** session. Learners build
 Finn — the customer-support agent of the fictional Barnacle & Fluke
 Whale-Watching Company — up from a blank slate, working through **modes**
-(Investigation → Tools → System prompt → Rules → Skills → Cost) that each
+(Investigation → Tools → Tone of voice → Rules → Skills → Cost) that each
 unlock more of the design pane and bring their own block of **eval cases**.
 Every change is measured: deterministic checks, an LLM judge, tone scores,
 and live token/cost readouts.

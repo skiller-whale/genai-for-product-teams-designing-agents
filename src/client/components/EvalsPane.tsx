@@ -56,6 +56,9 @@ export function EvalsPane({ active, mode }: Props) {
       .catch((err) => setError(err.message));
   }, []);
 
+  // An open case detail belongs to the mode it was opened in.
+  useEffect(() => setSelected(null), [mode]);
+
   const blockCases = useMemo(() => cases.filter((c) => c.block === mode), [cases, mode]);
   const blockRuns = useMemo(() => runs.filter((r) => r.block === mode), [runs, mode]);
 
