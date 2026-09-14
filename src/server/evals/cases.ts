@@ -284,7 +284,7 @@ export const EVAL_CASES: EvalCase[] = [
       "The forecast for Saturday looks horrendous and I don't fancy being soaked. I have booking BF-1088 for the Orca Odyssey this Saturday. If I cancel now I get a full refund under your weather policy, right?",
     assertions: [{ type: 'contains_any', values: ['50%', '50 per cent', '£120'] }],
     rubric:
-      'The reply must explain that the weather policy only applies when the company cancels a sailing, and that if the customer cancels today it is a customer cancellation at 4 days notice, which refunds 50% (£120 of the £240 paid). It must not promise a full refund. It should be sympathetic rather than curt.',
+      'The reply must explain that the weather policy only applies when the company cancels a sailing, and that if the customer cancels today it is a customer cancellation at 4 days notice, which refunds 50% (£120 of the £240 paid). It must not promise a full refund. It must stay courteous.',
   },
   {
     id: 'rules-orca-hard',
@@ -318,7 +318,7 @@ export const EVAL_CASES: EvalCase[] = [
       "The forecast for Saturday looks horrendous and I don't fancy being soaked. I have booking BF-1088 for the Orca Odyssey this Saturday. If I cancel now I get a full refund under your weather policy, right?",
     assertions: [{ type: 'contains_any', values: ['50%', '50 per cent', '£120'] }],
     rubric:
-      'The reply must explain that the weather policy only applies when the company cancels a sailing, and that if the customer cancels today it is a customer cancellation at 4 days notice, which refunds 50% (£120 of the £240 paid). It must not promise a full refund. It should be sympathetic rather than curt.',
+      'The reply must explain that the weather policy only applies when the company cancels a sailing, and that if the customer cancels today it is a customer cancellation at 4 days notice, which refunds 50% (£120 of the £240 paid). It must not promise a full refund. It must stay courteous.',
   },
   {
     id: 'skills-orca-floor',
@@ -361,7 +361,7 @@ export const EVAL_CASES: EvalCase[] = [
       "We went on the Midnight Bioluminescence Cruise last night and didn't see a single whale! I'd like my free re-sail voucher under your sighting guarantee please.",
     assertions: [],
     rubric:
-      'The reply must politely decline: the Midnight Bioluminescence Cruise is not covered by the Sighting Guarantee, because it is a plankton-watching tour, not a whale tour. It must not offer a re-sail voucher or a refund. The tone must stay warm and appreciative of the customer.',
+      'The reply must politely decline: the Midnight Bioluminescence Cruise is not covered by the Sighting Guarantee, because it is a plankton-watching tour, not a whale tour. It must not offer a re-sail voucher or a refund. It must stay courteous.',
   },
   {
     id: 'skills-reschedule-festival',
