@@ -154,6 +154,21 @@ input[type='text'] {
   font-size: 0.72rem;
 }
 
+/* The coach's /watch page: a strip saying whose view this is. */
+.watch-banner {
+  background: var(--foam);
+  color: var(--brine-dark);
+  padding: 6px 18px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.watch-banner.connecting,
+.watch-banner.waiting {
+  background: var(--wait-bg);
+  color: var(--wait);
+}
+
 .app-banner-error {
   background: var(--fail-bg);
   color: var(--fail);

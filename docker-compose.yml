@@ -15,14 +15,40 @@ services:
       # tool at an Ollama server (e.g. the host's, reached via host.docker.internal).
       OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-}"
       OLLAMA_MODEL: "${OLLAMA_MODEL:-qwen2.5:7b}"
+      # The coach sync file (AGENT-WORKBENCH.md) is written here, for the sync
+      # service below. SW_HOSTNAME (set on hosted-env VMs) and the host port
+      # make the coach's follow link: https://<vm>-port-1001.<domain>/watch.
+      COACH_SYNC_DIR: /app/coach_sync
+      SW_HOSTNAME: "${SW_HOSTNAME:-}"
+      WORKBENCH_PUBLIC_PORT: "1001"
     volumes:
       # Learner-edited agent config and eval run history survive container
       # restarts within a session.
       - workbench_data:/app/data
+      - coach_sync:/app/coach_sync
     # Harmless in production; lets the verification emulator reach a host Ollama.
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
+  # Sends the coach one file only: AGENT-WORKBENCH.md, the follow link plus a
+  # summary of the learner's Workbench. It appears in the coach's "Recently
+  # edited files" and updates as the learner works.
+  sync:
+    image: "ghcr.io/skiller-whale/learnersync:0.2.8"
+    network_mode: "host"
+    environment:
+      SERVER_URL: https://train.skillerwhale.com
+      SW_RUNNING_IN_HOSTED_ENV:
+      WATCHER_BASE_PATH: "/app/coach"
+      ATTENDANCE_ID_FILE: "/app/sync/attendance_id"
+      WATCHED_EXTS: ".md"
+    volumes:
+      - coach_sync:/app/coach:ro
+      - ./attendance_id:/app/sync/attendance_id
+    tty: true
+    stdin_open: true
+
 volumes:
   workbench_data:
+  coach_sync:

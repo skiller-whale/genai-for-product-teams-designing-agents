@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import type { AgentConfig, Skill } from '../../shared/types';
+import { useMirroredState } from '../mirror';
 
 interface Props {
   config: AgentConfig;
@@ -10,8 +10,8 @@ const EMPTY_SKILL: Skill = { name: '', description: '', body: '' };
 
 export function SkillsPanel({ config, onChange }: Props) {
   // Index of the skill open in the editor; 'new' for a fresh one; null closed.
-  const [editing, setEditing] = useState<number | 'new' | null>(null);
-  const [draft, setDraft] = useState<Skill>(EMPTY_SKILL);
+  const [editing, setEditing] = useMirroredState('skills.editing', null as number | 'new' | null);
+  const [draft, setDraft] = useMirroredState('skills.draft', EMPTY_SKILL);
 
   const openEditor = (index: number | 'new') => {
     setEditing(index);

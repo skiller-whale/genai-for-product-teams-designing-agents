@@ -191,3 +191,68 @@ export type EvalEvent =
   | { type: 'run_complete'; run: EvalRun }
   | { type: 'error'; message: string }
   | HeartbeatEvent;
+
+// ---- Coach view ----
+
+/** One turn of the Chat tab's conversation, as the learner's browser holds it. */
+export type ChatTurn =
+  | { role: 'user'; text: string }
+  | {
+      role: 'agent';
+      steps: TranscriptStep[];
+      usage: TokenUsage;
+      running: boolean;
+      error?: string;
+    };
+
+/** What the learner has on screen. Their browser publishes it key by key so
+ * the coach's read-only /watch page can mirror it and the coach sync file can
+ * summarise it. Each value is exactly what the owning component holds in
+ * state, so it can include things never saved on the server (the chat, a
+ * half-typed message, which eval case is open). */
+export interface LearnerView {
+  mode?: Mode;
+  /** Null only until the page has loaded it. */
+  config?: AgentConfig | null;
+  tab?: 'chat' | 'evals';
+  error?: string | null;
+  'chat.turns'?: ChatTurn[];
+  'chat.draft'?: string;
+  'chat.busy'?: boolean;
+  'evals.runs'?: EvalRun[];
+  /** The newest result per case, including ones streamed in from a run that
+   * hasn't finished yet. */
+  'evals.latest'?: Record<string, CaseResult>;
+  /** Case ids still waiting for a result; null when no run is in flight. */
+  'evals.running'?: string[] | null;
+  'evals.selected'?: string | null;
+  'evals.expanded'?: string[];
+  'evals.error'?: string | null;
+  /** Index of the skill open in the editor, 'new' for a fresh one, null when closed. */
+  'skills.editing'?: number | 'new' | null;
+  'skills.draft'?: Skill;
+}
+
+export type LearnerViewKey = keyof LearnerView;
+
+export const LEARNER_VIEW_KEYS: LearnerViewKey[] = [
+  'mode',
+  'config',
+  'tab',
+  'error',
+  'chat.turns',
+  'chat.draft',
+  'chat.busy',
+  'evals.runs',
+  'evals.latest',
+  'evals.running',
+  'evals.selected',
+  'evals.expanded',
+  'evals.error',
+  'skills.editing',
+  'skills.draft',
+];
+
+export function isLearnerViewKey(value: unknown): value is LearnerViewKey {
+  return typeof value === 'string' && (LEARNER_VIEW_KEYS as string[]).includes(value);
+}

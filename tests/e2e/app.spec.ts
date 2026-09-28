@@ -133,6 +133,8 @@ async function mockApi(page: Page) {
     return route.fulfill({ json: configResponse(mode) });
   });
   await page.route('**/api/config/reset', (route) => route.fulfill({ json: configResponse(mode) }));
+  // The learner's page publishes what it shows, for the coach's /watch page.
+  await page.route('**/api/view', (route) => route.fulfill({ json: { ok: true } }));
   await page.route('**/api/evals/cases', (route) => route.fulfill({ json: CASES }));
   await page.route('**/api/evals/runs', (route) => route.fulfill({ json: { runs: [] } }));
   await page.route('**/api/chat', (route) =>
@@ -301,4 +303,61 @@ test('the evals pane follows the mode', async ({ page }) => {
   await expect(page.getByText('Practical detail buried in the FAQ')).toBeVisible();
   await expect(page.getByText('Tour length and price')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Run this block \(1\)/ })).toBeVisible();
+});
+
+test("the learner's page publishes what it shows, for the coach", async ({ page }) => {
+  const published = page.waitForRequest(
+    (request) =>
+      request.url().endsWith('/api/view') &&
+      request.method() === 'PUT' &&
+      request.postDataJSON().key === 'tab' &&
+      request.postDataJSON().value === 'evals',
+  );
+  await page.getByRole('button', { name: /Evals/ }).click();
+  await published;
+});
+
+test.describe('the coach\'s /watch page', () => {
+  const LEARNER_VIEW = {
+    mode: 'tools',
+    config: { ...BLANK_CONFIG, enabledTools: ['calculator'] },
+    tab: 'evals',
+    'evals.latest': { 'tools-parking': { ...CASE_RESULT_FAIL, caseId: 'tools-parking', name: 'Practical detail buried in the FAQ' } },
+    'evals.expanded': ['tools-parking'],
+    'chat.turns': [{ role: 'user', text: 'Where do I park?' }],
+  };
+
+  // /api/view/events is the one route left unmocked: it streams from the real
+  // dev server, which is given the learner's view the way their page gives it.
+  test.beforeEach(async ({ page }) => {
+    for (const [key, value] of Object.entries(LEARNER_VIEW)) {
+      await page.request.put('/api/view', { data: { key, value } });
+    }
+    await page.goto('/watch');
+  });
+
+  test("shows the learner's mode, tab, agent and eval results", async ({ page }) => {
+    await expect(page.getByTestId('watch-banner')).toContainText('Following the learner live');
+    await expect(page.locator('.mode-step.active')).toContainText('Tools');
+    await expect(page.getByTestId('tools-panel').getByRole('checkbox', { name: /Calculator/ })).toBeChecked();
+    await expect(page.locator('.case-card', { hasText: 'Practical detail' }).locator('.case-status')).toHaveText('✗');
+    await expect(page.getByText('The answer never mentions')).toBeVisible();
+  });
+
+  test('is read-only: clicks change nothing and send nothing', async ({ page }) => {
+    const writes: string[] = [];
+    page.on('request', (request) => {
+      if (request.method() !== 'GET') writes.push(request.url());
+    });
+    await expect(page.getByTestId('watch-banner')).toContainText('Following');
+
+    await page.getByRole('button', { name: /Chat with Finn/ }).click();
+    await page.getByRole('button', { name: /Skills/ }).click();
+    await page.getByTestId('tools-panel').getByRole('checkbox', { name: /Search the knowledge base/ }).click();
+
+    await expect(page.locator('.mode-step.active')).toContainText('Tools');
+    await expect(page.getByText('Practical detail buried in the FAQ')).toBeVisible();
+    await expect(page.getByTestId('tools-panel').getByRole('checkbox', { name: /Search the knowledge base/ })).not.toBeChecked();
+    expect(writes).toEqual([]);
+  });
 });

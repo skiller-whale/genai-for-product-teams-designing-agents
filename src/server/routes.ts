@@ -1,7 +1,10 @@
 import { Hono } from 'hono';
-import { isMode } from '../shared/types';
+import { streamSSE } from 'hono/streaming';
+import { isLearnerViewKey, isMode } from '../shared/types';
 import { getProvider, type ChatMessage } from './ai';
 import { runAgent } from './agent/loop';
+import { scheduleCoachFile } from './coach/syncFile';
+import { getView, onViewChange, setViewKey } from './coach/view';
 import { toolInfos } from './agent/tools';
 import {
   activeConfig,
@@ -20,6 +23,12 @@ import { SIMULATED_DATE } from './scenario';
 import { TONE_BRIEFS } from './scenario/toneBriefs';
 
 const routes = new Hono();
+
+// Anything that changes what the learner sees rewrites the coach sync file.
+routes.use('*', async (c, next) => {
+  await next();
+  if (c.req.method !== 'GET') scheduleCoachFile();
+});
 
 function configResponse() {
   const mode = loadMode();
@@ -71,6 +80,40 @@ routes.post('/evals/clear-history', (c) => {
   return c.json({ ok: true });
 });
 
+// ---- Coach view ----
+// The learner's browser publishes what it has on screen, one key at a time;
+// the coach's /watch page follows it over server-sent events.
+
+routes.put('/view', async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  if (!isLearnerViewKey(body.key)) {
+    return c.json({ error: `Unknown view key: ${String(body.key)}` }, 400);
+  }
+  setViewKey(body.key, body.value);
+  return c.json({ ok: true });
+});
+
+/** Gap between keepalives: under Bun's 10s idle timeout, as for NDJSON. */
+const VIEW_HEARTBEAT_MS = 5000;
+
+routes.get('/view/events', (c) =>
+  streamSSE(c, async (stream) => {
+    let open = true;
+    const unsubscribe = onViewChange((key, value) => {
+      stream.writeSSE({ event: 'key', data: JSON.stringify({ key, value }) }).catch(() => {});
+    });
+    stream.onAbort(() => {
+      open = false;
+      unsubscribe();
+    });
+    await stream.writeSSE({ event: 'snapshot', data: JSON.stringify(getView()) });
+    while (open) {
+      await stream.sleep(VIEW_HEARTBEAT_MS);
+      if (open) await stream.writeSSE({ event: 'heartbeat', data: '' });
+    }
+  }),
+);
+
 interface HistoryTurn {
   role: 'user' | 'assistant';
   text: string;
@@ -114,6 +157,7 @@ routes.post('/evals/run', async (c) => {
   return ndjson(async (write) => {
     const run = await runEvals({ provider: getProvider(), config, block, caseIds, onEvent: write });
     appendRun(run);
+    scheduleCoachFile();
   });
 });
 

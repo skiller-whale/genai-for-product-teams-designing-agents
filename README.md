@@ -19,6 +19,18 @@ and learners open <http://localhost:1001>. The LLM is reached through the
 Skiller Whale Bedrock proxy: `bedrock_proxy: {}` in the exercise config plus
 `SW_ATTENDANCE_ID` as the AWS access key — no real API keys anywhere.
 
+## Following a learner (for coaches)
+
+The coach gets one synced file, `AGENT-WORKBENCH.md`, in their "Recently
+edited files". It starts with a link to the learner's Workbench at `/watch`:
+a live, read-only mirror of exactly what the learner sees (mode, tab, chat,
+eval runs as they stream, the case they have open, the skill they are
+editing). Under the link is a plain-text summary of the same state, so the
+coach can see where the learner is at a glance.
+
+The learner's page publishes its on-screen state to `PUT /api/view`; the
+/watch page follows it over server-sent events from `GET /api/view/events`.
+
 ## Local development
 
 ```sh
@@ -47,6 +59,7 @@ bunx playwright test    # e2e tests (mock every /api route)
 - `src/server/scenario/` — the Barnacle & Fluke knowledge base, bookings, canned web results
 - `src/server/evals/` — eval cases, deterministic assertions, LLM judge, runner
 - `src/server/config/` — learner config + run history persistence (JSON in `DATA_DIR`)
+- `src/server/coach/` — the coach's view: learner view store and the coach sync file
 - `src/client/` — the React workbench UI
 - `src/shared/` — types and pricing shared by both sides
 

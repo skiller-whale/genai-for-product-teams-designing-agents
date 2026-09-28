@@ -5,3 +5,4 @@ data/
 .env.local
 playwright-report/
 test-results/
+coach_sync/

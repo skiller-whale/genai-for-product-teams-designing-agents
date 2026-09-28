@@ -9,6 +9,7 @@ import type {
   ToneBrief,
   ToolInfo,
 } from '../shared/types';
+import { WATCHING } from './mirror';
 
 async function json<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -23,6 +24,12 @@ async function json<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+/** Backstop for the coach's /watch page, which must never change the
+ * learner's Workbench (clicks are already swallowed before they get here). */
+function refuseIfWatching(): void {
+  if (WATCHING) throw new Error('This is a read-only view of the learner\'s Workbench.');
+}
+
 export interface ConfigResponse {
   mode: Mode;
   config: AgentConfig;
@@ -35,7 +42,8 @@ export function getConfig(): Promise<ConfigResponse> {
   return fetch('/api/config').then((r) => json<ConfigResponse>(r));
 }
 
-export function putConfig(config: AgentConfig): Promise<{ config: AgentConfig }> {
+export async function putConfig(config: AgentConfig): Promise<{ config: AgentConfig }> {
+  refuseIfWatching();
   return fetch('/api/config', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -43,7 +51,8 @@ export function putConfig(config: AgentConfig): Promise<{ config: AgentConfig }>
   }).then((r) => json<{ config: AgentConfig }>(r));
 }
 
-export function putMode(mode: Mode): Promise<ConfigResponse> {
+export async function putMode(mode: Mode): Promise<ConfigResponse> {
+  refuseIfWatching();
   return fetch('/api/mode', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -51,7 +60,8 @@ export function putMode(mode: Mode): Promise<ConfigResponse> {
   }).then((r) => json<ConfigResponse>(r));
 }
 
-export function resetConfig(): Promise<ConfigResponse> {
+export async function resetConfig(): Promise<ConfigResponse> {
+  refuseIfWatching();
   return fetch('/api/config/reset', { method: 'POST' }).then((r) => json<ConfigResponse>(r));
 }
 
@@ -69,7 +79,8 @@ export function getRuns(): Promise<{ runs: EvalRun[] }> {
   return fetch('/api/evals/runs').then((r) => json<{ runs: EvalRun[] }>(r));
 }
 
-export function clearHistory(): Promise<{ ok: boolean }> {
+export async function clearHistory(): Promise<{ ok: boolean }> {
+  refuseIfWatching();
   return fetch('/api/evals/clear-history', { method: 'POST' }).then((r) =>
     json<{ ok: boolean }>(r),
   );
@@ -81,6 +92,7 @@ async function streamNdjson<E>(
   body: unknown,
   onEvent: (event: E) => void,
 ): Promise<void> {
+  refuseIfWatching();
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

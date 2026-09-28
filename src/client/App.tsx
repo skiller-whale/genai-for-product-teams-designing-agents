@@ -1,21 +1,20 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type KeyboardEvent, type SyntheticEvent } from 'react';
 import type { AgentConfig, Mode, ToneBrief, ToolInfo } from '../shared/types';
 import { MODES } from '../shared/types';
 import * as api from './api';
+import { WATCHING, useMirroredState, useWatchStatus } from './mirror';
 import { DesignPane } from './components/DesignPane';
 import { ChatPane } from './components/ChatPane';
 import { EvalsPane } from './components/EvalsPane';
 
-type Tab = 'chat' | 'evals';
-
 export default function App() {
-  const [mode, setMode] = useState<Mode>('investigation');
-  const [config, setConfig] = useState<AgentConfig | null>(null);
+  const [mode, setMode] = useMirroredState('mode', 'investigation');
+  const [config, setConfig] = useMirroredState('config', null as AgentConfig | null);
   const [tools, setTools] = useState<ToolInfo[]>([]);
   const [toneBriefs, setToneBriefs] = useState<ToneBrief[]>([]);
   const [simulatedDate, setSimulatedDate] = useState('');
-  const [tab, setTab] = useState<Tab>('chat');
-  const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useMirroredState('tab', 'chat');
+  const [error, setError] = useMirroredState('error', null as string | null);
 
   const applyConfigResponse = useCallback((response: api.ConfigResponse) => {
     setMode(response.mode);
@@ -66,7 +65,8 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app" {...(WATCHING ? READ_ONLY_HANDLERS : {})}>
+      {WATCHING && <WatchBanner />}
       <header className="app-header">
         <div className="app-title">
           <h1>🐋 Agent Workbench</h1>
@@ -125,6 +125,45 @@ export default function App() {
           </div>
         </main>
       </div>
+    </div>
+  );
+}
+
+/** On /watch, swallow anything that would change the learner's Workbench:
+ * clicks, typing, pasting, dropping. Opening a collapsed tool call or skill
+ * (a <summary>) is still allowed, since that only changes the coach's page. */
+function block(e: SyntheticEvent) {
+  if (e.target instanceof Element && e.target.closest('summary')) return;
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+const READ_ONLY_HANDLERS = {
+  // Blocking mousedown also stops the coach's clicks focusing the learner's fields.
+  onMouseDownCapture: block,
+  onClickCapture: block,
+  onKeyDownCapture: (e: KeyboardEvent) => {
+    // Keep keys that only scroll the page; block the rest.
+    if (/^(Arrow|Page|Home|End)/.test(e.key) && !(e.target instanceof HTMLTextAreaElement)) return;
+    block(e);
+  },
+  onBeforeInputCapture: block,
+  onPasteCapture: block,
+  onCutCapture: block,
+  onDropCapture: block,
+  onSubmitCapture: block,
+};
+
+function WatchBanner() {
+  const status = useWatchStatus();
+  const text = {
+    connecting: 'Connecting to the learner\'s Workbench…',
+    waiting: 'Waiting for the learner to open the Workbench. Until then this shows the saved agent.',
+    following: 'Following the learner live. Read-only: you see what they see, and nothing you do changes it.',
+  }[status];
+  return (
+    <div className={`watch-banner ${status}`} role="status" data-testid="watch-banner">
+      👀 {text}
     </div>
   );
 }

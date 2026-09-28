@@ -1,24 +1,12 @@
-import { useRef, useState } from 'react';
-import type { TokenUsage, TranscriptStep } from '../../shared/types';
+import { useEffect, useRef } from 'react';
+import type { ChatTurn, TranscriptStep } from '../../shared/types';
 import { EMPTY_USAGE, addUsage } from '../../shared/types';
 import * as api from '../api';
+import { WATCHING, useMirroredState } from '../mirror';
 import { StepList } from './StepList';
 import { TokenBadge } from './TokenBadge';
 
-interface UserTurn {
-  role: 'user';
-  text: string;
-}
-
-interface AgentTurn {
-  role: 'agent';
-  steps: TranscriptStep[];
-  usage: TokenUsage;
-  running: boolean;
-  error?: string;
-}
-
-type Turn = UserTurn | AgentTurn;
+type AgentTurn = Extract<ChatTurn, { role: 'agent' }>;
 
 const SUGGESTIONS = [
   'How long is the Full-Day Orca Odyssey, and how much does it cost?',
@@ -34,11 +22,16 @@ function finalTextOf(turn: AgentTurn): string {
 }
 
 export function ChatPane() {
-  const [turns, setTurns] = useState<Turn[]>([]);
-  const [draft, setDraft] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [turns, setTurns] = useMirroredState('chat.turns', []);
+  const [draft, setDraft] = useMirroredState('chat.draft', '');
+  const [busy, setBusy] = useMirroredState('chat.busy', false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // The learner's own sends scroll their chat; the coach's follows along.
+  useEffect(() => {
+    if (WATCHING) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, [turns]);
 
   const scrollDown = () => {
     requestAnimationFrame(() => {

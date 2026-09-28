@@ -45,6 +45,13 @@ matter when editing.
   (`COST_BLOCK_BUDGET_USD`); both constants need calibrating against the
   hosted model.
 
+- **The coach's /watch page must never change anything.** It renders the
+  learner's published view (`src/client/mirror.ts`) and swallows input
+  (`READ_ONLY_HANDLERS` in `App.tsx`); mutating calls in `src/client/api.ts`
+  refuse on /watch as a backstop. Any new piece of on-screen state a coach
+  would need to see goes through `useMirroredState` with a key added to
+  `LearnerView` / `LEARNER_VIEW_KEYS` in `src/shared/types.ts`.
+
 ## Architecture in one breath
 
 Hono server (`src/server`) exposes `/api`; `POST /api/chat` and
@@ -55,6 +62,13 @@ is JSON files in `DATA_DIR` (a Docker volume in the hosted environment). React
 client in `src/client` (Vite). Shared types in `src/shared/types.ts`.
 
 ## Hosted-environment specifics
+
+- Coach sync: the `sync` service (learnersync) watches only the
+  `coach_sync` volume, where the server writes `AGENT-WORKBENCH.md`
+  (`src/server/coach/`): the /watch link, built from `SW_HOSTNAME` as
+  `https://<vm>-port-1001.<domain>/watch`, then a text summary of the mode,
+  tab, evals, agent design and chat. Rewritten a few seconds after any
+  change; unset `COACH_SYNC_DIR` (local dev) and nothing is written.
 
 - Container port 3000, host port 1001; single server serves frontend + API.
 - Bedrock proxy: endpoint `https://bedrock-runtime.aws-proxy.skillerwhale.com/`,

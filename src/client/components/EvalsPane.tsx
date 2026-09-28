@@ -8,6 +8,7 @@ import {
   nextBudgetLevel,
 } from '../../shared/pricing';
 import * as api from '../api';
+import { useMirroredState } from '../mirror';
 import { StepList } from './StepList';
 import { TokenBadge } from './TokenBadge';
 
@@ -29,14 +30,15 @@ export function EvalsPane({ active, mode }: Props) {
   const [cases, setCases] = useState<EvalCaseSummary[]>([]);
   const [tonePassThreshold, setTonePassThreshold] = useState(70);
   const [costBudgetLevels, setCostBudgetLevels] = useState<CostBudgetLevel[]>([]);
-  const [runs, setRuns] = useState<EvalRun[]>([]);
-  // caseId → 'running' while a run is in flight (results land in `latest`).
-  const [running, setRunning] = useState<Set<string> | null>(null);
+  // Everything below is mirrored to the coach's /watch page.
+  const [runs, setRuns] = useMirroredState('evals.runs', []);
+  // Ids of the cases still running while a run is in flight (results land in `latest`).
+  const [running, setRunning] = useMirroredState('evals.running', null as string[] | null);
   // The most recent result per case, updated live as results stream in.
-  const [latest, setLatest] = useState<Record<string, CaseResult>>({});
-  const [selected, setSelected] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [error, setError] = useState<string | null>(null);
+  const [latest, setLatest] = useMirroredState('evals.latest', {});
+  const [selected, setSelected] = useMirroredState('evals.selected', null as string | null);
+  const [expanded, setExpanded] = useMirroredState('evals.expanded', []);
+  const [error, setError] = useMirroredState('evals.error', null as string | null);
 
   useEffect(() => {
     api
@@ -66,17 +68,12 @@ export function EvalsPane({ active, mode }: Props) {
     if (running) return;
     setError(null);
     const included = caseIds ?? blockCases.map((c) => c.id);
-    setRunning(new Set(included));
+    setRunning(included);
     try {
       await api.streamEvals(mode, caseIds, (event) => {
         if (event.type === 'case_result') {
           setLatest((current) => ({ ...current, [event.result.caseId]: event.result }));
-          setRunning((current) => {
-            if (!current) return current;
-            const next = new Set(current);
-            next.delete(event.result.caseId);
-            return next;
-          });
+          setRunning((current) => current && current.filter((id) => id !== event.result.caseId));
         } else if (event.type === 'run_complete') {
           setRuns((r) => [...r, event.run]);
         } else if (event.type === 'error') {
@@ -99,12 +96,9 @@ export function EvalsPane({ active, mode }: Props) {
   };
 
   const toggleExpanded = (id: string) => {
-    setExpanded((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    setExpanded((current) =>
+      current.includes(id) ? current.filter((c) => c !== id) : [...current, id],
+    );
   };
 
   // Aggregate of the latest result per case in this block.
@@ -140,8 +134,8 @@ export function EvalsPane({ active, mode }: Props) {
         <button className="btn-run" onClick={() => startRun()} disabled={!!running}>
           ▶ Run this block ({blockCases.length})
         </button>
-        {running && running.size > 0 && (
-          <span className="evals-running">Running {running.size} case{running.size === 1 ? '' : 's'}…</span>
+        {running && running.length > 0 && (
+          <span className="evals-running">Running {running.length} case{running.length === 1 ? '' : 's'}…</span>
         )}
         {blockLatest.length > 0 && (
           <span className="evals-summary" data-testid="evals-summary">
@@ -215,8 +209,8 @@ export function EvalsPane({ active, mode }: Props) {
       <ul className="case-list">
         {blockCases.map((c) => {
           const result = latest[c.id];
-          const isRunning = running?.has(c.id) ?? false;
-          const isExpanded = expanded.has(c.id);
+          const isRunning = running?.includes(c.id) ?? false;
+          const isExpanded = expanded.includes(c.id);
           return (
             <li key={c.id} className="case-card">
               <div className={`case-row ${isRunning ? 'running' : result ? (result.passed ? 'pass' : 'fail') : ''}`}>

@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serveStatic } from 'hono/bun';
+import { writeCoachFile } from './coach/syncFile';
 import routes from './routes';
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -36,6 +37,10 @@ if (isProduction) {
   app.use('/*', serveStatic({ root }));
   app.get('*', serveStatic({ path: `${root}/index.html` }));
 }
+
+// Write the coach sync file straight away, so the coach has the follow link
+// before the learner has done anything.
+writeCoachFile();
 
 console.log(`Server running on http://localhost:${port} (production=${isProduction})`);
 
